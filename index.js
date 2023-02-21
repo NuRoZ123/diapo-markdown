@@ -1,10 +1,14 @@
 const {BrowserWindow, app, Menu} = require('electron');
 const fs = require('fs/promises');
-const hljs = require('highlight.js');
 const process = require('process');
+const mdToDiapos = require('./mdCtrl.js');
 
-const DIAPOPATH = './diapo';
+// path variable
+const CURRENTPATH = process.cwd();
+const DIAPOPATH = 'diapo';
 const TEMPHTML = 'temp.html';
+const FULLURL = CURRENTPATH + "\\" + DIAPOPATH + "\\" + TEMPHTML;
+
 let windows;
 let diapos = [];
 let indexDiapo = 0;
@@ -37,7 +41,6 @@ const createWindow = () => {
         height: 600
     });
 
-    // window.loadFile(TEMPHTML);
     window.once('ready-to-show', () => {
         window.show();
         window.maximize();
@@ -45,22 +48,17 @@ const createWindow = () => {
     return window;
 }
 
-Menu.setApplicationMenu(appMenu);
-
 const lauch = async () => {
     await app.whenReady();
     window = createWindow();
-    await main();
+    diapos = await mdToDiapos(CURRENTPATH + "\\" + DIAPOPATH + "\\presentation.md");
 
-    await fs.writeFile(TEMPHTML, diapos[0] + '<link href="style.css" rel="stylesheet">');
-    await window.loadFile(TEMPHTML);
+    await writeDiapo(0);
 }
 
 const writeDiapo = async (index) => {
-    console.log(process.cwd() + TEMPHTML);
-    await fs.writeFile(TEMPHTML, diapos[index] + '<link href="style.css" rel="stylesheet">');
-
-    await window.loadFile(TEMPHTML);
+    await fs.writeFile(FULLURL, diapos[index] + '<link href="style.css" rel="stylesheet">');
+    await window.loadFile(FULLURL);
 }
 
 const nextDiapo = async () => {
@@ -78,7 +76,6 @@ const previousDiapo = async () => {
     }
 }
 
-lauch();
 app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {
         app.quit();
@@ -89,49 +86,5 @@ app.on('window-all-closed', () => {
     }
 });
 
-hljs.configure({
-    languages: ['javascript', 'css', 'html', 'xml', 'bash', 'json', 'markdown'],
-    classPrefix: '',
-});
-
-const md = require("markdown-it")({
-    highlight: function (str, lang) {
-        if (lang && hljs.getLanguage(lang)) {
-            try {
-                return hljs.highlight(str, {language: lang}).value;
-            } catch (__) {}
-        }
-
-        return ''; // use external default escaping
-    }
-});
-
-const fileToString = async (filename) => {
-    return fs.readFile(filename, {encoding: "utf-8"});
-}
-
-const splitDiapo = (str) => {
-    str = str.split("---");
-    return str;
-}
-
-const diaposMdTodiaposHtml = (diaposMd) => {
-    let diaposHtml = []
-    for(let diapoMd of diaposMd) {
-        diaposHtml.push(mdToHtml(diapoMd));
-    }
-
-    return diaposHtml;
-}
-
-const mdToHtml = (mdStr) => {
-    return md.render(mdStr, "js");
-}
-
-
-const main = async () => {
-    const file = DIAPOPATH + "/presentation.md";
-    const fileStr = await fileToString(file);
-    const diaposMd = splitDiapo(fileStr);
-    diapos = diaposMdTodiaposHtml(diaposMd);
-}
+Menu.setApplicationMenu(appMenu);
+lauch();
