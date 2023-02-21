@@ -5,7 +5,9 @@ const process = require('process');
 
 const DIAPOPATH = './diapo';
 const TEMPHTML = 'temp.html';
+const MODEL = './window/index.html'
 let windows;
+let modelWindow;
 let diapos = [];
 let indexDiapo = 0;
 
@@ -45,15 +47,29 @@ const createWindow = () => {
     return window;
 }
 
+const windowModel = () => {
+    const window = new BrowserWindow({show:false});
+
+    // window.loadFile(TEMPHTML);
+    window.once('ready-to-show', () => {
+        window.show();
+        window.maximize();
+    });
+    return window;
+}
+
 Menu.setApplicationMenu(appMenu);
 
 const lauch = async () => {
     await app.whenReady();
     window = createWindow();
+    modelWindow = windowModel()
     await main();
+    await generateHtml(0)
 
     await fs.writeFile(TEMPHTML, diapos[0] + '<link href="style.css" rel="stylesheet">');
     await window.loadFile(TEMPHTML);
+    await modelWindow.loadFile(MODEL)
 }
 
 const writeDiapo = async (index) => {
@@ -68,6 +84,7 @@ const nextDiapo = async () => {
     if(indexDiapo < diapos.length - 1) {
         indexDiapo++;
         await writeDiapo(indexDiapo);
+        await generateHtml(indexDiapo)
     }
 }
 
@@ -75,6 +92,7 @@ const previousDiapo = async () => {
     if(indexDiapo > 0) {
         indexDiapo--;
         await writeDiapo(indexDiapo);
+        await generateHtml(indexDiapo)
     }
 }
 
@@ -116,11 +134,11 @@ const splitDiapo = (str) => {
 }
 
 const diaposMdTodiaposHtml = (diaposMd) => {
+
     let diaposHtml = []
     for(let diapoMd of diaposMd) {
         diaposHtml.push(mdToHtml(diapoMd));
     }
-
     return diaposHtml;
 }
 
@@ -134,4 +152,25 @@ const main = async () => {
     const fileStr = await fileToString(file);
     const diaposMd = splitDiapo(fileStr);
     diapos = diaposMdTodiaposHtml(diaposMd);
+}
+
+const generateHtml = async (index) => {
+    await fs.writeFile(MODEL, '<!DOCTYPE html>\n' + '<html lang="en">\n' + '<head>\n' + '    <meta charset="UTF-8">\n' + '    <title>Diaporama</title>\n')
+    await fs.appendFile(MODEL, '    <link href="style.css" rel="stylesheet">\n')
+    await fs.appendFile(MODEL, '    <link href="base.css" rel="stylesheet">\n')
+    await fs.appendFile(MODEL, '</head>\n' + '<body>\n')
+    await fs.appendFile(MODEL,'    <div class="menu overflow">\n' + '    <div class="title">\n' + '            <span>DIAPOSITIVES</span>\n' + '      </div>\n')
+    for (let i = 0; i < diapos.length; i++) {
+        if (i === index) {
+            await fs.appendFile(MODEL, '    <div class="slide border">\n' + '\n'+ diapos[i] + '\n' + '    </div>\n');
+        }else {
+            await fs.appendFile(MODEL, '    <div class="slide">\n' + '\n'+ diapos[i] + '\n' + '    </div>\n');
+        }
+
+    }
+    await fs.appendFile(MODEL, '    </div>\n')
+    await fs.appendFile(MODEL, '  <div class="current-slide">\n' + diapos[index] +  '  </div>')
+    await fs.appendFile(MODEL, '</body\n</html>')
+
+    await modelWindow.loadFile(MODEL)
 }

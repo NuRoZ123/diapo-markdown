@@ -1,0 +1,66 @@
+* {
+    margin:0;
+    padding:0;
+}
+
+body {
+    background: #313338;
+    display: flex;
+}
+
+.menu {
+    width: 15.75rem;
+    height: 100vh;
+    background: #2b2d31;
+}
+
+.overflow {
+    overflow-y: scroll;
+    overflow-x: hidden;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.overflow::-webkit-scrollbar {
+    display: none;
+}
+
+.title {
+    color: #F5F1F1;
+    text-align: center;
+    margin: 1.5rem auto;
+}
+
+.slide {
+    height: 8rem;
+    width: 11.25rem;
+    background: #F5F1F1;
+    border-radius: 0.2rem;
+    margin: 1rem auto;
+    font-size: 0.4vw;
+    transform: scale(1);
+}
+
+.slide img{
+    height: auto;
+    max-width: 5.25rem;
+}
+
+.slide pre {
+    font-size: 0.16vw;
+    overflow: hidden;
+}
+
+.current-slide {
+    height: 36rem;
+    width: 64rem;
+    padding: 2rem;
+    background: #F5F1F1;
+    border-radius: 0.25rem;
+    margin: auto auto;
+}
+
+.border {
+    transform: scale(1.2);
+    margin: 2rem auto;
+}
