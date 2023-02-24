@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <title>Import</title>
+    </head>
+    <body>
+        <input id="input" type="file" onchange="sendPath()">
+    </body>
+</html>
+
+<script>
+    let input;
+
+    window.onload = () => {
+        input = document.getElementById("input");
+    }
+
+    const sendPath = () => {
+        window.api.send("import", input.files[0].path);
+    }
+</script>

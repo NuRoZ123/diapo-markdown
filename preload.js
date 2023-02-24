@@ -9,7 +9,7 @@ contextBridge.exposeInMainWorld(
     "api", {
         send: (channel, data) => {
             // whitelist channels
-            let validChannels = ["toMain", "slideClick"];
+            let validChannels = ["toMain", "slideClick", "import"];
             if (validChannels.includes(channel)) {
                 ipcRenderer.send(channel, data);
             }
