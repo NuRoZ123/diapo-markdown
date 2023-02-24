@@ -2,11 +2,14 @@
   "main": "index.js",
   "module": "module",
   "dependencies": {
+    "archiver": "^5.3.1",
     "D": "^1.0.0",
+    "decompress": "^4.2.1",
     "electron": "^23.1.0",
     "highlight.js": "^11.7.0",
     "markdown-it": "^13.0.1",
-    "process": "^0.11.10"
+    "process": "^0.11.10",
+    "zip-a-folder": "^1.1.5"
   },
   "scripts": {
     "start": "electron ."

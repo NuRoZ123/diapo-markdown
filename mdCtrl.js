@@ -37,6 +37,18 @@ const diaposMdTodiaposHtml = (diaposMd) => {
 }
 
 const mdToHtml = (mdStr) => {
+    md.use(function(markdown) {
+        markdown.renderer.rules.link_open = function(tokens, idx, options, env, self) {
+            let href = tokens[idx].attrs[0][1];
+            href = href.split('#')[0]
+            if (href.startsWith('./assets/')) {
+                const fileContents = fs.readFileSync(href.replace('./', './diapo/'), 'utf8');
+                const code = `<code class="language-javascript">${fileContents}</code>`;
+                return `<pre>${code}</pre>`;
+            }
+            return self.renderToken(tokens, idx, options);
+        }
+    });
     return md.render(mdStr, "js");
 }
 
