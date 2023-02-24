@@ -9,7 +9,7 @@ body {
 }
 
 .menu {
-    width: 15.75rem;
+    width: 17.75rem;
     height: 100vh;
     background: #2b2d31;
 }
@@ -36,6 +36,7 @@ body {
     width: 11.25rem;
     background: #F5F1F1;
     border-radius: 0.2rem;
+    padding: 1rem;
     margin: 1rem auto;
     font-size: 0.4vw;
     transform: scale(1);
@@ -52,15 +53,47 @@ body {
 }
 
 .current-slide {
+
     height: 36rem;
     width: 64rem;
     padding: 2rem;
     background: #F5F1F1;
     border-radius: 0.25rem;
-    margin: auto auto;
 }
 
 .border {
-    transform: scale(1.2);
+    transform: scale(1.1);
     margin: 2rem auto;
+}
+
+.row {
+
+    width: 16.75rem;
+    display: flex;
+    justify-content: center;
+}
+
+.row .num-diapo{
+    color: #ffffff;
+    margin-left: 1rem;
+    margin-top: 1rem;
+}
+
+.column {
+    width:auto;
+    display : flex;
+    flex-direction: column;
+    align-items: center;
+    margin: auto auto;
+}
+
+.timer {
+    display: flex;
+    justify-content: center;
+    position: absolute;
+    bottom: 0;
+    height: 4rem;
+    width: auto;
+    font-size: 3rem;
+    color: #c5c8c6;
 }
