@@ -9,7 +9,7 @@ const {slide} = require("./window/templates.js")
 const CURRENTPATH = process.cwd();
 const DIAPOPATH = 'diapo';
 const TEMPHTML = 'temp.html';
-const MODEL = CURRENTPATH + "\\" + "model.html";
+const MODEL = CURRENTPATH + "\\" + DIAPOPATH + "\\" + "model.html";
 const FULLURL = CURRENTPATH + "\\" + DIAPOPATH + "\\" + TEMPHTML;
 
 let windows;
@@ -82,6 +82,8 @@ const lauch = async () => {
     diapos = await mdToDiapos(CURRENTPATH + "\\" + DIAPOPATH + "\\presentation.md");
 
     await writeDiapo(0);
+
+    await generateHtml(0);
     await modelWindow.loadFile(MODEL)
 }
 
@@ -89,7 +91,6 @@ const writeDiapo = async (index) => {
     await fs.writeFile(FULLURL, diapos[index] + '<link href="style.css" rel="stylesheet">');
     await window.loadFile(FULLURL);
 
-    modelWindow.webContents.send("changeSlide", {diapo: diapos[indexDiapo], diapoLength : diapos.length, id:indexDiapo});
 }
 
 const nextDiapo = async () => {
@@ -97,6 +98,7 @@ const nextDiapo = async () => {
     if(indexDiapo < diapos.length - 1) {
         indexDiapo++;
         await writeDiapo(indexDiapo);
+        modelWindow.webContents.send("changeSlide", {diapo: diapos[indexDiapo], diapoLength : diapos.length, id:indexDiapo});
     }
 }
 
@@ -104,6 +106,7 @@ const previousDiapo = async () => {
     if(indexDiapo > 0) {
         indexDiapo--;
         await writeDiapo(indexDiapo);
+        modelWindow.webContents.send("changeSlide", {diapo: diapos[indexDiapo], diapoLength : diapos.length, id:indexDiapo});
     }
 }
 

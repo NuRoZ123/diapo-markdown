@@ -1,5 +1,7 @@
 const hljs = require("highlight.js");
-const fs = require("fs/promises");
+const fsPromise = require("fs/promises");
+const fs = require("fs");
+const process = require("process");
 const md = require("markdown-it")({
     highlight: function (str, lang) {
         if (lang && hljs.getLanguage(lang)) {
@@ -7,10 +9,9 @@ const md = require("markdown-it")({
                 return hljs.highlight(str, {language: lang}).value;
             } catch (__) {}
         }
-
         return '';
-    }
-});
+    },
+})
 
 hljs.configure({
     languages: ['javascript', 'css', 'html', 'xml', 'bash', 'json', 'markdown'],
@@ -18,7 +19,7 @@ hljs.configure({
 });
 
 const fileToString = async (filename) => {
-    return fs.readFile(filename, {encoding: "utf-8"});
+    return fsPromise.readFile(filename, {encoding: "utf-8"});
 }
 
 const splitDiapo = (str) => {
