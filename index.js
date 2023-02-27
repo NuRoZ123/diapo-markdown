@@ -29,7 +29,7 @@ const appMenu = Menu.buildFromTemplate([
       submenu: [
             {
                 label: "Ouvrir",
-                accelerator: "CmdOrCtrl+I",
+                accelerator: "CmdOrCtrl+O",
                 click: async () => {
                     await importFunction();
                 }
