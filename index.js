@@ -24,7 +24,7 @@ let indexDiapo = 0;
 
 const appMenu = Menu.buildFromTemplate([
     {
-      label: "fichiers",
+      label: "Fichiers",
       submenu: [
             {
                 label: "Importer",
@@ -43,7 +43,7 @@ const appMenu = Menu.buildFromTemplate([
         ]
     },
     {
-        label: 'diapos',
+        label: 'Diapos',
         submenu: [
             {
                 label: 'next',
@@ -92,7 +92,7 @@ const windowModel = () => {
     window.once('ready-to-show', () => {
         window.show();
         window.maximize();
-        window.webContents.openDevTools()
+        // window.webContents.openDevTools()
     });
 
 
@@ -130,9 +130,12 @@ const lauch = async () => {
     }
 }
 
-const exportFunction= async () => {
-    await zip(CURRENTPATH + "\\" + DIAPOPATH, EXPORTPATH);
-    console.log("exported");
+const exportFunction = async () => {
+    const splitPath = __dirname.split('\\');
+    const exportPath = `${splitPath[0]}/${splitPath[1]}/${splitPath[2]}/Downloads/presentation.codeprez`
+    await zip(CURRENTPATH + "\\" + DIAPOPATH, exportPath);
+    modelWindow.webContents.send("exported", `presentation.codeprez exported at ${splitPath[0]}/${splitPath[1]}/${splitPath[2]}/Downloads`);
+    console.log("exported", exportPath);
 }
 
 const importFunction = async () => {
@@ -255,6 +258,9 @@ const generateHtml = async (index) => {
         '            return hours + ":" + minutes + ":" + seconds;\n' +
         '        }\n' +
         '\n' +
+        'window.api.receive("exported", (data) => {\n' +
+        '            alert(data)\n' +
+        '        })' +
         '    </script>')
     await fsPromise.appendFile(MODEL, '</body>\n</html>')
 
