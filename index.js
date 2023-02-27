@@ -155,15 +155,7 @@ const createDiapo = async (path) => {
     await fsPromise.copyFile(path, CURRENTPATH + "\\" + DIAPOPATH + "\\presentation.zip");
     await decompress(CURRENTPATH + "\\" + DIAPOPATH + "\\presentation.zip", CURRENTPATH + "\\" + DIAPOPATH);
     await fsPromise.unlink(CURRENTPATH + "\\" + DIAPOPATH + "\\presentation.zip");
-
-    const files = await fsPromise.readdir(CURRENTPATH + "\\" + DIAPOPATH);
-    const subFile = await fsPromise.readdir(CURRENTPATH + "\\" + DIAPOPATH + "\\" + files[0]);
-
-    for (const file of subFile) {
-        await fsPromise.rename(CURRENTPATH + "\\" + DIAPOPATH + "\\" + files[0] + "\\" + file, CURRENTPATH + "\\" + DIAPOPATH + "\\" + file);
-    }
-    await fsPromise.rm(CURRENTPATH + "\\" + DIAPOPATH + "\\" + files[0], {recursive: true});
-
+    await fsPromise.readdir(CURRENTPATH + "\\" + DIAPOPATH);
     await lauch();
 }
 
