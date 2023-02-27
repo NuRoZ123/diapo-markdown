@@ -90,9 +90,8 @@ const windowModel = () => {
     window.once('ready-to-show', () => {
         window.show();
         window.maximize();
-        // window.webContents.openDevTools()
+        window.webContents.openDevTools()
     });
-
 
     return window;
 }
@@ -118,7 +117,13 @@ const lauch = async () => {
         await writeDiapo(0);
 
         await generateHtml(0);
+
         await modelWindow.loadFile(MODEL);
+        if (fs.existsSync('./diapo')) {
+            const json = require('./diapo/config.json')
+            modelWindow.webContents.send("duration", json);
+        }
+
         windowImport.hide();
         window.show();
         modelWindow.show();
@@ -210,6 +215,8 @@ const generateHtml = async (index) => {
     await fsPromise.appendFile(MODEL, '  <div class="column"><div class="current-slide" id="current-slide">\n' + diapos[index] +  '  </div><span class="timer" id="timer">00:00:00</span>\n</div>')
     await fsPromise.appendFile(MODEL,
         '<script>\n' +
+        '        \n' +
+        '        let json\n' +
         '        const slideClick = (id) => {\n' +
         '            window.api.send("slideClick", id);\n' +
         '        }\n' +
@@ -242,8 +249,12 @@ const generateHtml = async (index) => {
         '        //convert variable longTimer to hh:mm:ss\n' +
         '        function convertTime(longTimer) {\n' +
         '            let hours = Math.floor(longTimer / 3600);\n' +
+        '            let totalTime = longTimer / 60;\n'+
         '            let minutes = Math.floor((longTimer - (hours * 3600)) / 60);\n' +
         '            let seconds = longTimer - (hours * 3600) - (minutes * 60);\n' +
+        '            if (totalTime >= parseInt(json.duration)) {\n' +
+        '                document.getElementById("timer").classList.add("red")\n' +
+        '            }\n' +
         '            if (hours < 10) {\n' +
         '                hours = "0" + hours;\n' +
         '            }\n' +
@@ -256,9 +267,14 @@ const generateHtml = async (index) => {
         '            return hours + ":" + minutes + ":" + seconds;\n' +
         '        }\n' +
         '\n' +
-        'window.api.receive("exported", (data) => {\n' +
+        '        window.api.receive("exported", (data) => {\n' +
         '            alert(data)\n' +
-        '        })' +
+        '        })\n' +
+        '\n' +
+        '        window.api.receive("duration", (data) => {\n' +
+        '            json = data\n' +
+        '        })\n' +
+        '    \n' +
         '    </script>')
     await fsPromise.appendFile(MODEL, '</body>\n</html>')
 
