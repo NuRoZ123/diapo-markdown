@@ -65,8 +65,6 @@ const appMenu = Menu.buildFromTemplate([
 
 const createWindow = () => {
     const window = new BrowserWindow({
-        width: 800,
-        height: 600
     });
 
     window.once('ready-to-show', () => {
@@ -278,4 +276,7 @@ ipcMain.on("import", async (event, path) => {
 });
 
 Menu.setApplicationMenu(appMenu);
+if(fs.existsSync(CURRENTPATH + "\\" + DIAPOPATH)) {
+    fs.rmSync(CURRENTPATH + "\\" + DIAPOPATH, {recursive: true});
+}
 lauch();
