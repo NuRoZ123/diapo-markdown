@@ -1,4 +1,4 @@
-const {BrowserWindow, app, Menu, ipcMain} = require('electron');
+const {BrowserWindow, app, Menu, ipcMain, dialog} = require('electron');
 const fsPromise = require('fs/promises');
 const fs = require('fs');
 const process = require('process');
@@ -11,14 +11,15 @@ const {zip} = require("zip-a-folder");
 // path variable
 const CURRENTPATH = process.cwd();
 const DIAPOPATH = 'diapo';
+const DIAPOPATHTEMPSAVE = 'diaposave';
 const TEMPHTML = 'temp.html';
 const MODEL = CURRENTPATH + "\\" + DIAPOPATH + "\\" + "model.html";
 const FULLURL = CURRENTPATH + "\\" + DIAPOPATH + "\\" + TEMPHTML;
-const EXPORTPATH = "C:\\Users\\Public\\presentation.codeprez";
 
 let window;
 let modelWindow;
 let windowImport;
+let windowExport;
 let diapos = [];
 let indexDiapo = 0;
 
@@ -27,17 +28,17 @@ const appMenu = Menu.buildFromTemplate([
       label: "Fichiers",
       submenu: [
             {
-                label: "Importer",
+                label: "Ouvrir",
                 accelerator: "CmdOrCtrl+I",
                 click: async () => {
                     await importFunction();
                 }
             },
             {
-                label: "Exporter",
+                label: "Enregistrer",
                 accelerator: "CmdOrCtrl+E",
                 click: async () => {
-                    await exportFunction();
+                    await registerFunction();
                 }
             }
         ]
@@ -110,6 +111,10 @@ const lauch = async () => {
         windowImport = windowModel();
     }
 
+    if(!windowExport) {
+        windowExport = windowModel();
+    }
+
     // if diapo folder exist
     if (fs.existsSync(CURRENTPATH + "\\" + DIAPOPATH)) {
         diapos = await mdToDiapos(CURRENTPATH + "\\" + DIAPOPATH + "\\presentation.md");
@@ -125,6 +130,7 @@ const lauch = async () => {
         }
 
         windowImport.hide();
+        windowExport.hide();
         window.show();
         modelWindow.show();
 
@@ -133,12 +139,13 @@ const lauch = async () => {
     }
 }
 
-const exportFunction = async () => {
-    const splitPath = __dirname.split('\\');
-    const exportPath = `${splitPath[0]}/${splitPath[1]}/${splitPath[2]}/Downloads/presentation.codeprez`
-    await zip(CURRENTPATH + "\\" + DIAPOPATH, exportPath);
-    modelWindow.webContents.send("exported", `presentation.codeprez exported at ${splitPath[0]}/${splitPath[1]}/${splitPath[2]}/Downloads`);
-    console.log("exported", exportPath);
+const registerFunction = async () => {
+    windowExport.show();
+    windowImport.hide();
+    window.hide();
+    modelWindow.hide();
+
+    await windowExport.loadFile(CURRENTPATH + "\\save.html");
 }
 
 const importFunction = async () => {
@@ -147,6 +154,7 @@ const importFunction = async () => {
 
     window.hide();
     modelWindow.hide();
+    windowExport.hide();
 
     if (fs.existsSync(CURRENTPATH + "\\" + DIAPOPATH)) {
         await fsPromise.rm(CURRENTPATH + "\\" + DIAPOPATH, {recursive: true});
@@ -291,6 +299,47 @@ ipcMain.on("import", async (event, path) => {
     await createDiapo(path);
 });
 
+ipcMain.on("save", async (event, jsonInfo) => {
+    const result = await dialog.showSaveDialog(windowExport, {properties: ['openDirectory']});
+    if (!result.canceled) {
+        if (fs.existsSync(CURRENTPATH + "\\" + DIAPOPATHTEMPSAVE)) {
+            fs.rmSync(CURRENTPATH + "\\" + DIAPOPATHTEMPSAVE, {recursive: true});
+        }
+
+        await fsPromise.mkdir(CURRENTPATH + "\\" + DIAPOPATHTEMPSAVE);
+
+        const mdFileName = jsonInfo.markdown.split("\\").pop();
+        await fsPromise.copyFile(jsonInfo.markdown, CURRENTPATH + "\\" + DIAPOPATHTEMPSAVE + "\\" + mdFileName);
+
+        const cssFileName = jsonInfo.style.split("\\").pop();
+        await fsPromise.copyFile(jsonInfo.style, CURRENTPATH + "\\" + DIAPOPATHTEMPSAVE + "\\" + cssFileName);
+
+        await fsPromise.mkdir(CURRENTPATH + "\\" + DIAPOPATHTEMPSAVE + "\\" + "assets");
+        for(const asset of jsonInfo.assets) {
+            const assetName = asset.split("\\").pop();
+            await fsPromise.copyFile(asset, CURRENTPATH + "\\" + DIAPOPATHTEMPSAVE + "\\assets\\" + assetName);
+        }
+
+        await fsPromise.mkdir(CURRENTPATH + "\\" + DIAPOPATHTEMPSAVE + "\\" + "env")
+        for(const env of jsonInfo.env) {
+            const envName = env.split("\\").pop();
+            await fsPromise.copyFile(env, CURRENTPATH + "\\" + DIAPOPATHTEMPSAVE + "\\env\\" + envName);
+        }
+
+        const config = {
+            "title": jsonInfo.title,
+            "authors": jsonInfo.authors.split(";"),
+            "duration": jsonInfo.duration,
+        }
+        await fsPromise.writeFile(CURRENTPATH + "\\" + DIAPOPATHTEMPSAVE + "\\" + "config.json", JSON.stringify(config));
+        await zip(CURRENTPATH + "\\" + DIAPOPATHTEMPSAVE, result.filePath + ".codeprez");
+        modelWindow.webContents.send("exported", `${result.filePath}.codeprez exported !`);
+
+        await fsPromise.rm(CURRENTPATH + "\\" + DIAPOPATHTEMPSAVE, {recursive: true});
+        await importFunction();
+    }
+
+});
 Menu.setApplicationMenu(appMenu);
 if(fs.existsSync(CURRENTPATH + "\\" + DIAPOPATH)) {
     fs.rmSync(CURRENTPATH + "\\" + DIAPOPATH, {recursive: true});

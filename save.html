@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <title>register</title>
+    </head>
+    <body>
+        <input type="file" accept=".md" id="markdown">
+        <input type="file" accept=".css" id="style">
+        <input type="file" webkitdirectory id="assets">
+        <input type="file" webkitdirectory id="env">
+        <label>title
+            <input id="title">
+        </label>
+        <label>auteurs (séparer par des points-virgules)
+            <input id="authors">
+        </label>
+        <label>durée (en min)
+            <input id="duration" type="number">
+        </label>
+        <button id="submit">Enregistrer sous</button>
+    </body>
+
+<script>
+let markdown;
+let style;
+let assets;
+let env;
+let title;
+let authors;
+let duration;
+
+const sendInfo = () => {
+    if(markdown.files.length > 0 && style.files.length > 0 && assets.files.length > 0 && env.files.length > 0 && title.value !== "" && authors.value !== "" && duration.value !== "") {
+        const assetsFiles = [];
+        for(let i = 0; i < assets.files.length; i++) {
+            assetsFiles.push(assets.files[i].path);
+        }
+
+        const envFiles = [];
+        for(let i = 0; i < env.files.length; i++) {
+            envFiles.push(env.files[i].path);
+        }
+
+        const data = {
+        "markdown": markdown.files[0].path,
+        "style": style.files[0].path,
+        "assets": assetsFiles,
+        "env": envFiles,
+        "title": title.value,
+        "authors": authors.value,
+        "duration": duration.value,
+        };
+
+        window.api.send("save", data);
+    } else {
+        alert("Veuillez remplir tous les champs");
+    }
+}
+
+window.onload = () => {
+    markdown = document.getElementById("markdown");
+    style = document.getElementById("style");
+    assets = document.getElementById("assets");
+    env = document.getElementById("env");
+    title = document.getElementById("title");
+    authors = document.getElementById("authors");
+    duration = document.getElementById("duration");
+    let submit = document.getElementById("submit");
+
+    submit.addEventListener("click", sendInfo);
+}
+
+</script>
+</html>
