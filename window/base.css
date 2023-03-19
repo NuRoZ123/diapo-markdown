@@ -38,18 +38,18 @@ body {
     border-radius: 0.2rem;
     padding: 1rem;
     margin: 1rem auto;
-    font-size: 0.4vw;
+    font-size: 5%;
     transform: scale(1);
 }
 
 .slide img{
     height: auto;
-    max-width: 5.25rem;
+    max-width: 6.25rem;
 }
 
 .slide pre {
-    font-size: 0.16vw;
     overflow: hidden;
+    height: auto;
 }
 
 .current-slide {
@@ -100,4 +100,25 @@ body {
 
 .red {
     color: #d82727;
+}
+
+.flex-bash {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+}
+
+.slide .flex-bash pre code {
+    height: 80%;
+    width: auto;
+}
+
+.console-output {
+    height: auto;
+    background: #1d1f21;
+    color: #c5c8c6;
+}
+
+.slide .console-output {
+    max-height: 4rem;
 }

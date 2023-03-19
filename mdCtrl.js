@@ -38,18 +38,56 @@ const diaposMdTodiaposHtml = (diaposMd) => {
 
 const mdToHtml = (mdStr) => {
     md.use(function(markdown) {
+
         markdown.renderer.rules.link_open = function(tokens, idx, options, env, self) {
-            let href = tokens[idx].attrs[0][1];
+            const token = tokens[idx]
+            let href = tokens[idx].attrs[0][1]
             href = href.split('#')[0]
             if (href.startsWith('./assets/')) {
                 const fileContents = fs.readFileSync(href.replace('./', './diapo/'), 'utf8');
-                const code = `<code class="language-javascript">${fileContents}</code>`;
-                return `<pre>${code}</pre>`;
+                const code = `<code class="language-js">${hljs.highlight('javascript', fileContents).value}</code>`
+                return `<pre>${code}</pre>`
             }
-            return self.renderToken(tokens, idx, options);
-        }
-    });
-    return md.render(mdStr, "js");
+            return self.renderToken(tokens, idx, options)
+        };
+
+        markdown.renderer.rules.fence = (tokens, idx, options, env, self) => {
+            const token = tokens[idx]
+            const code = token.content.trim()
+            if (token.info === 'bash') {
+                return `
+                    <div class="flex-bash">
+                        <img onclick="codeExecute()" src="../right.png" alt="">
+                        <pre><code class="language-bash" id="code">${code}</code></pre>
+                    </div>
+                    <pre class="console-output" id="console-output">
+                    </pre>
+                    <script>
+                    let code = document.getElementById('code')
+                    let consoleOutput = document.getElementById('console-output')
+                    
+                    const codeExecute = () => {
+                        console.log(code.innerText)
+                        window.api.send("executeCode", code.innerText);
+                    
+                    }
+                    
+                    window.api.receive("consoleOutput", (data) => {
+                            console.log(data)
+                            consoleOutput.innerHTML = '<code>' + data.toString() + '</code>'
+                        })
+                    
+                    </script>`
+                } else if (token.info === 'js'){
+
+                    return `<pre> <code class="language-js">${hljs.highlight('javascript', code).value}</code>
+                    </pre>`
+                }
+
+                return self.renderToken(tokens, idx, options)
+            }
+    })
+    return md.render(mdStr, "js")
 }
 
 

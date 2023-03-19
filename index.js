@@ -7,6 +7,7 @@ const path = require("path");
 const {slide} = require("./window/templates.js")
 const decompress = require("decompress");
 const {zip} = require("zip-a-folder");
+const { exec } = require('child_process');
 
 // path variable
 const CURRENTPATH = process.cwd();
@@ -66,6 +67,13 @@ const appMenu = Menu.buildFromTemplate([
 
 const createWindow = () => {
     const window = new BrowserWindow({
+        show:false,
+        nodeIntegration: true,
+        contextIsolation: true,
+        enableRemoteModule: true,
+        webPreferences: {
+            preload: path.join(__dirname, 'preload.js')
+        }
     });
 
     window.once('ready-to-show', () => {
@@ -91,7 +99,7 @@ const windowModel = () => {
     window.once('ready-to-show', () => {
         window.show();
         window.maximize();
-        window.webContents.openDevTools()
+        // window.webContents.openDevTools()
     });
 
     return window;
@@ -283,7 +291,23 @@ const generateHtml = async (index) => {
         '            json = data\n' +
         '        })\n' +
         '    \n' +
-        '    </script>')
+        '    </script>' +
+        '<script>\n' +
+        '                    let code = document.getElementById("code")\n' +
+        '                    let consoleOutput = document.getElementById("console-output")\n' +
+        '                    \n' +
+        '                    const codeExecute = () => {\n' +
+        '                        console.log(code.innerText)\n' +
+        '                        window.api.send("executeCode", code.innerText);\n' +
+        '                    \n' +
+        '                    }\n' +
+        '                    \n' +
+        '                    window.api.receive("consoleOutput", (data) => {\n' +
+        '                            console.log(data)\n' +
+        '                            consoleOutput.innerHTML = "<code>" + data.toString() + "</code>"\n' +
+        '                        })\n ' +
+        '                   \n ' +
+        '                   </script>')
     await fsPromise.appendFile(MODEL, '</body>\n</html>')
 
     await modelWindow.loadFile(MODEL)
@@ -298,6 +322,25 @@ ipcMain.on("slideClick", async (event, id) => {
 ipcMain.on("import", async (event, path) => {
     await createDiapo(path);
 });
+
+ipcMain.on("executeCode", async (event, command) => {
+    console.log(command)
+    exec(command, (error, stdout, stderr) => {
+        if (error) {
+            modelWindow.webContents.send("consoleOutput", `error: ${error.message}\n`)
+            window.webContents.send("consoleOutput", `error: ${error.message}\n`)
+            return
+        }
+        if (stderr) {
+            modelWindow.webContents.send("consoleOutput", `stderr: ${stderr}\n`)
+            window.webContents.send("consoleOutput", `stderr: ${stderr}\n`)
+            return
+        }
+        modelWindow.webContents.send("consoleOutput", `stdout: ${stdout}`)
+        window.webContents.send("consoleOutput", `stdout: ${stdout}`)
+
+    })
+})
 
 ipcMain.on("save", async (event, jsonInfo) => {
     const result = await dialog.showSaveDialog(windowExport, {properties: ['openDirectory']});
