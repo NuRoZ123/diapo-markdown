@@ -79,7 +79,7 @@ const createWindow = () => {
     window.once('ready-to-show', () => {
         window.show();
         window.maximize();
-        // window.webContents.openDevTools()
+        window.webContents.openDevTools()
     });
     return window;
 }
@@ -327,17 +327,17 @@ ipcMain.on("executeCode", async (event, command) => {
     console.log(command)
     exec(command, (error, stdout, stderr) => {
         if (error) {
-            modelWindow.webContents.send("consoleOutput", `error: ${error.message}\n`)
-            window.webContents.send("consoleOutput", `error: ${error.message}\n`)
+            modelWindow.webContents.send("consoleOutput", `${error.message}\n`)
+            window.webContents.send("consoleOutput", `${error.message}\n`)
             return
         }
         if (stderr) {
-            modelWindow.webContents.send("consoleOutput", `stderr: ${stderr}\n`)
-            window.webContents.send("consoleOutput", `stderr: ${stderr}\n`)
+            modelWindow.webContents.send("consoleOutput", `${stderr}\n`)
+            window.webContents.send("consoleOutput", `${stderr}\n`)
             return
         }
-        modelWindow.webContents.send("consoleOutput", `stdout: ${stdout}`)
-        window.webContents.send("consoleOutput", `stdout: ${stdout}`)
+        modelWindow.webContents.send("consoleOutput", `${stdout}`)
+        window.webContents.send("consoleOutput", `${stdout}`)
 
     })
 })

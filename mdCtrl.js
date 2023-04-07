@@ -11,6 +11,7 @@ const md = require("markdown-it")({
         }
         return '';
     },
+    html : true
 })
 
 hljs.configure({
@@ -46,7 +47,7 @@ const mdToHtml = (mdStr) => {
             if (href.startsWith('./assets/')) {
                 const fileContents = fs.readFileSync(href.replace('./', './diapo/'), 'utf8');
                 const code = `<code class="language-js">${hljs.highlight('javascript', fileContents).value}</code>`
-                return `<pre>${code}</pre>`
+                return `<pre class="js">${code}</pre>`
             }
             return self.renderToken(tokens, idx, options)
         };
@@ -80,7 +81,7 @@ const mdToHtml = (mdStr) => {
                     </script>`
                 } else if (token.info === 'js'){
 
-                    return `<pre> <code class="language-js">${hljs.highlight('javascript', code).value}</code>
+                    return `<pre class="js"> <code class="language-js">${hljs.highlight('javascript', code).value}</code>
                     </pre>`
                 }
 

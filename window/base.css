@@ -6,6 +6,8 @@
 body {
     background: #313338;
     display: flex;
+    margin: 0;
+    padding: 0;
 }
 
 .menu {
@@ -32,11 +34,12 @@ body {
 }
 
 .slide {
+    position: relative;
+    overflow: hidden;
     height: 8rem;
     width: 11.25rem;
     background: #F5F1F1;
     border-radius: 0.2rem;
-    padding: 1rem;
     margin: 1rem auto;
     font-size: 5%;
     transform: scale(1);
@@ -53,10 +56,9 @@ body {
 }
 
 .current-slide {
-
+    overflow: hidden;
     height: 36rem;
     width: 64rem;
-    padding: 2rem;
     background: #F5F1F1;
     border-radius: 0.25rem;
 }
@@ -106,15 +108,11 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-around;
-}
-
-.slide .flex-bash pre code {
-    height: 80%;
-    width: auto;
+    width: 700px;
 }
 
 .console-output {
-    height: auto;
+    height: 300px;
     background: #1d1f21;
     color: #c5c8c6;
 }
