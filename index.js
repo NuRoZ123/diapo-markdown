@@ -79,8 +79,9 @@ const createWindow = () => {
     window.once('ready-to-show', () => {
         window.show();
         window.maximize();
-        window.webContents.openDevTools()
+        // window.webContents.openDevTools()
     });
+
     return window;
 }
 
